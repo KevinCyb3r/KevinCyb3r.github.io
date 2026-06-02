@@ -1,3 +1,9 @@
+---
+title: "HackTheBox Write-up: Reactor"
+date: 2026-06-01 
+categories: [Write-ups, HackTheBox]
+tags: [linux, easy, react2shell, cve-2025-55182]
+---
 # HackTheBox — Reactor
 
 <p align="center">
