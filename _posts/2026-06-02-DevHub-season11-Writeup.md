@@ -1,3 +1,8 @@
+---
+title: "HackTheBox Write-up: DevHub"
+date: 2026-06-02
+categories: [Write-ups, HackTheBox]
+---
 # HackTheBox - DevHub (Medium)
 
 <p align="center">
