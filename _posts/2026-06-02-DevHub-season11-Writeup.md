@@ -5,9 +5,6 @@ categories: [Write-ups, HackTheBox]
 ---
 # HackTheBox - DevHub (Medium)
 
-<p align="center">
-  <img src="https://labs.hackthebox.com/storage/avatars/b4b74f0c978255ba45d4c3ab159f8a37.png" alt="DevHub" width="200"/>
-</p>
 
 | Info | Detail |
 |------|--------|
