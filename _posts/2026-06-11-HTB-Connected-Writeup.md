@@ -1,5 +1,5 @@
 # HackTheBox - Connected | Writeup
-
+categories: [Write-ups, HackTheBox]
 ![HTB Badge](https://img.shields.io/badge/HackTheBox-Connected-green?style=for-the-badge&logo=hackthebox)
 ![Difficulty](https://img.shields.io/badge/Difficulty-Medium-orange?style=for-the-badge)
 ![OS](https://img.shields.io/badge/OS-Linux-blue?style=for-the-badge&logo=linux)
