@@ -10,7 +10,7 @@
 | -------------- | ------------------------------------------ |
 | **Name**       | Connected                                  |
 | **OS**         | Linux (CentOS)                             |
-| **Difficulty** | Medium                                     |
+| **Difficulty** | Easy                                     |
 | **IP**         | 10.129.x.x                                 |
 | **Services**   | HTTP (80), HTTPS (443), SSH (22)            |
 | **Application**| FreePBX 16.0.40.7                          |
@@ -372,4 +372,4 @@ root
 
 ---
 
-*Writeup by phat | HackTheBox Season 2025*
+*Writeup by phat | HackTheBox Season 11 2026*
