@@ -1,8 +1,17 @@
+---
+title: "HackTheBox Write-up: Paperwork"
+date: 2026-07-16 
+categories: [Write-ups, HackTheBox]
+---
+
 # HackTheBox — Paperwork (Season 11)
 
 ![Difficulty: Easy](https://img.shields.io/badge/Difficulty-Easy-brightgreen)
 ![OS: Linux](https://img.shields.io/badge/OS-Linux-blue)
 ![Rating: 4.1](https://img.shields.io/badge/Rating-4.1-yellow)
+
+<img width="1236" height="488" alt="Screenshot 2026-07-16 005659" src="https://github.com/user-attachments/assets/722c6d43-3b5a-4e77-978d-feeded338627" />
+
 
 ## Table of Contents
 
@@ -75,6 +84,10 @@ PORT     STATE SERVICE        VERSION
 
 Browsing to `http://paperwork.htb/` reveals a corporate **"Intake Portal"** for a Document Archiving Service.
 
+<img width="1917" height="822" alt="Screenshot 2026-07-15 235755" src="https://github.com/user-attachments/assets/0e3dac25-6d88-4404-8946-51a4d52d5d6a" />
+
+<img width="1917" height="331" alt="Screenshot 2026-07-15 235822" src="https://github.com/user-attachments/assets/efb76e61-8a99-4c42-ba98-c766b42087a2" />
+
 Key information from the page:
 
 - **Protocol**: `Compliance Level: RFC 1179` — This is the **Line Printer Daemon** protocol
@@ -86,6 +99,8 @@ Key information from the page:
 wget http://paperwork.htb/download/archive -O paperwork-archive-v1.02.zip
 unzip paperwork-archive-v1.02.zip
 ```
+
+<img width="240" height="77" alt="Screenshot 2026-07-15 235840" src="https://github.com/user-attachments/assets/0bfbecbf-c804-4e89-ba71-f20185ca9075" />
 
 This gives us `server.py` — the source code of the LPD service running on port 1515.
 
@@ -327,6 +342,8 @@ RESP: @PJL FSUPLOAD NAME="0:/../user.txt" SIZE=33
 37db42e3f8611c8e13481a408665ecb2
 ```
 
+<img width="640" height="208" alt="Screenshot 2026-07-16 004349" src="https://github.com/user-attachments/assets/39798b36-e25a-4253-89cb-582a3f9e8670" />
+
 **Path traversal** works because `jetdirect.py`'s `_translate()` method doesn't validate the resolved path stays within the root directory:
 
 ```python
@@ -480,6 +497,8 @@ root@paperwork:~# cat /root/root.txt
 
 > 🏁 **Root Flag**: obtained ✅
 
+<img width="617" height="247" alt="Screenshot 2026-07-16 005716" src="https://github.com/user-attachments/assets/30078ca8-6bfc-4e32-b602-97d5fc3b0ae9" />
+
 ---
 
 ## Summary
@@ -503,4 +522,4 @@ root@paperwork:~# cat /root/root.txt
 
 ---
 
-*Writeup by phat — HackTheBox Season 11*
+*Writeup by phat(deniedp4kg) — HackTheBox Season 11*
